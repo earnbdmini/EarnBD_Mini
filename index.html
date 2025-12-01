@@ -69,8 +69,13 @@
 </head>
 <body>
 
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="fixed inset-0 bg-[#0f0f0f] z-[200] flex items-center justify-center">
+        <div class="loader"></div>
+    </div>
+
     <!-- AUTH SCREEN (LOGIN / SIGNUP) -->
-    <div id="auth-screen">
+    <div id="auth-screen" class="hidden">
         <div class="mb-6 text-center">
             <h1 class="text-4xl font-bold gold-text">PREMIUM</h1>
             <p class="text-gray-400 text-sm">Earn Rewards Daily</p>
@@ -87,7 +92,7 @@
             <div id="auth-form">
                 <div class="mb-3">
                     <label class="text-xs text-gray-400 ml-1 mb-1 block">Phone Number</label>
-                    <input type="number" id="auth-phone" placeholder="017xxxxxxxx" class="custom-input">
+                    <input type="tel" id="auth-phone" placeholder="017xxxxxxxx" class="custom-input" maxlength="11">
                 </div>
                 
                 <div class="mb-3">
@@ -107,19 +112,20 @@
                     </div>
                 </div>
 
-                <button onclick="handleAuthSubmit()" id="auth-btn" class="w-full py-3 mt-2 rounded-xl gold-gradient text-black font-bold shadow-lg active:scale-95 transition-transform uppercase tracking-wide">
+                <!-- FIX: Function name corrected here -->
+                <button onclick="submitAuth()" id="auth-btn" class="w-full py-3 mt-2 rounded-xl gold-gradient text-black font-bold shadow-lg active:scale-95 transition-transform uppercase tracking-wide">
                     Login Now
                 </button>
             </div>
         </div>
         
-        <p id="loading-txt" class="mt-4 text-xs text-gray-500 hidden">Connecting to server...</p>
+        <p class="mt-4 text-xs text-gray-500">Secure System v2.0</p>
     </div>
 
     <!-- MAIN APP INTERFACE (Initially Hidden) -->
     <div id="app-interface" class="hidden flex flex-col h-full w-full">
         <!-- HEADER -->
-        <header class="glass-panel border-b-0 rounded-b-3xl p-4 z-40 shrink-0">
+        <header id="app-header" class="glass-panel border-b-0 rounded-b-3xl p-4 z-40 shrink-0 hidden">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <img id="user-photo" src="https://ui-avatars.com/api/?name=U&background=random" class="w-11 h-11 rounded-full border-2 border-[#FFD700] object-cover p-0.5">
@@ -138,10 +144,10 @@
         </header>
 
         <!-- CONTENT -->
-        <div id="main-app"></div>
+        <div id="main-app" class="hidden"></div>
 
         <!-- NAVBAR -->
-        <nav class="glass-panel rounded-t-3xl pb-4 pt-3 z-50 shrink-0 h-20">
+        <nav id="app-nav" class="glass-panel rounded-t-3xl pb-4 pt-3 z-50 shrink-0 h-20 hidden">
             <div class="nav-container">
                 <div onclick="router('home')" class="nav-item active" id="btn-home"><i class="fas fa-home text-xl"></i><span>Home</span></div>
                 <div onclick="router('tasks')" class="nav-item" id="btn-tasks"><i class="fas fa-list-check text-xl"></i><span>Tasks</span></div>
@@ -149,14 +155,22 @@
                 <div onclick="router('history')" class="nav-item" id="btn-history"><i class="fas fa-history text-xl"></i><span>History</span></div>
                 <div onclick="router('refer')" class="nav-item" id="btn-refer"><i class="fas fa-users text-xl"></i><span>Refer</span></div>
             </div>
-            <!-- Logout Button (Small extra feature for web) -->
+            <!-- Logout Button -->
             <div class="absolute top-[-15px] left-1/2 transform -translate-x-1/2">
                  <button onclick="logout()" class="bg-red-500/80 text-white rounded-full p-2 text-xs shadow-lg border border-red-400"><i class="fas fa-power-off"></i></button>
             </div>
         </nav>
     </div>
 
+    <!-- ERROR BOX -->
+    <div id="error-box" class="hidden fixed inset-0 flex items-center justify-center bg-black z-50">
+        <div class="text-center p-6">
+            <i class="fas fa-wifi text-red-500 text-4xl mb-4"></i>
+            <p class="text-white">Connection Failed. Check Internet.</p>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LINK -->
     <script src="script.js"></script>
 </body>
-  </html>
+</html>
