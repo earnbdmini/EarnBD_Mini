@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Earn Pro</title>
+    <title>Earn Pro User</title>
 
     <!-- LIBRARIES -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,39 +15,45 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Poppins', sans-serif; background-color: #0f0f0f; color: #ffffff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; user-select: none; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; }
+        
         .gold-gradient { background: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #d4af37 100%); color: #000; }
         .gold-text { background: linear-gradient(to right, #FFD700, #FDB931); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        #main-app { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; scrollbar-width: none; }
+        
+        #main-app { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; }
+        
         .nav-container { display: flex; justify-content: space-around; align-items: center; height: 100%; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #6b7280; }
-        .nav-item.active { color: #FFD700; transform: scale(1.05); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #6b7280; transition: 0.3s; }
+        .nav-item.active { color: #FFD700; transform: scale(1.1); }
+        
         .custom-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         select.custom-input option { background: #1a1a1a; color: white; }
+
+        .loader { border: 4px solid #333; border-top: 4px solid #FFD700; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <!-- LOADING SCREEN -->
     <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f0f0f]">
-        <h2 class="text-2xl font-bold gold-text tracking-widest">LOADING...</h2>
-        <div id="error-box" class="hidden mt-4 text-center">
-            <p class="text-red-500 mb-2">Connection Issue</p>
-            <button onclick="location.reload()" class="bg-white/10 px-4 py-2 rounded text-white">Retry</button>
-        </div>
+        <div class="loader mb-4"></div>
+        <h2 class="text-xl font-bold gold-text tracking-widest">LOADING...</h2>
+        <div id="error-box" class="hidden mt-4 text-center"><button onclick="location.reload()" class="bg-white/10 px-4 py-2 rounded text-white text-xs">Retry Connection</button></div>
     </div>
 
     <!-- AUTH SCREEN -->
     <div id="auth-screen" class="hidden fixed inset-0 z-40 bg-[#0f0f0f] flex flex-col items-center justify-center p-6">
-        <div class="mb-8 text-center"><h1 class="text-4xl font-bold gold-text">EARN PRO</h1></div>
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm">
-            <!-- Tabs -->
+        <div class="mb-8 text-center"><h1 class="text-4xl font-bold gold-text">EARN PRO</h1><p class="text-xs text-gray-500 mt-1">Join & Earn Daily</p></div>
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm border border-[#FFD700]/20">
             <div class="flex mb-6 bg-white/5 rounded-lg p-1">
-                <button onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black">Login</button>
-                <button onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 rounded-md text-sm font-bold text-gray-400">Register</button>
+                <button onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition">Login</button>
+                <button onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition">Register</button>
             </div>
             
-            <!-- Inputs -->
             <div id="auth-form">
                 <input type="number" id="auth-phone" placeholder="Phone Number" class="custom-input">
                 <input type="password" id="auth-pass" placeholder="Password" class="custom-input">
@@ -57,7 +63,7 @@
                     <input type="number" id="auth-ref" placeholder="Referral Code (Optional)" class="custom-input">
                 </div>
 
-                <button id="auth-btn" onclick="submitAuth()" class="w-full py-3 rounded-xl gold-gradient text-black font-bold mt-2 shadow-lg active:scale-95 transition-transform">LOGIN</button>
+                <button id="auth-btn" onclick="submitAuth()" class="w-full py-3 rounded-xl gold-gradient text-black font-bold mt-2 shadow-lg active:scale-95 transition">LOGIN NOW</button>
             </div>
         </div>
     </div>
@@ -66,8 +72,8 @@
     <header class="glass-panel border-b-0 rounded-b-3xl p-4 z-40 shrink-0 hidden" id="app-header">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img id="user-photo" src="" class="w-11 h-11 rounded-full border-2 border-[#FFD700] p-0.5">
-                <div><h3 id="user-name" class="font-bold text-md text-white">...</h3><span class="text-[10px] text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">VIP Member</span></div>
+                <img id="user-photo" src="" class="w-11 h-11 rounded-full border-2 border-[#FFD700] p-0.5 object-cover">
+                <div><h3 id="user-name" class="font-bold text-md text-white">...</h3><span class="text-[10px] text-gray-400 bg-white/10 px-2 py-0.5 rounded-full border border-white/5">Member</span></div>
             </div>
             <div class="text-right">
                 <p class="text-[9px] text-gray-400 uppercase mb-1">Balance</p>
@@ -79,7 +85,7 @@
     <!-- MAIN CONTENT -->
     <div id="main-app" class="hidden"></div>
 
-    <!-- BOTTOM NAV -->
+    <!-- NAVBAR -->
     <nav class="glass-panel rounded-t-3xl pb-4 pt-3 z-50 shrink-0 h-20 hidden" id="app-nav">
         <div class="nav-container">
             <div onclick="router('home')" class="nav-item active" id="btn-home"><i class="fas fa-home text-xl"></i><span>Home</span></div>
@@ -101,45 +107,48 @@
         let appSettings = {};
         let adFuncs = { interstitial: null, rewarded: null, popup: null };
         let authMode = 'login';
-        const REQUIRED_TIME = 15000;
+        const REQUIRED_TIME = 15000; // 15 Seconds Timer
 
+        // Anti-Cheat Device ID
         function getDeviceFingerprint() { return 'DEV-' + navigator.userAgent.replace(/\D+/g, '').substring(0, 12); }
 
         // 2. INITIALIZATION
         async function initApp() {
             try {
+                // Fetch Settings
                 const { data: s, error } = await supabase.from('settings').select('*').single();
-                
                 if (error || !s) {
-                    console.log("Settings error, using defaults");
                     appSettings = { 
                         conversion_rate: 1, 
                         min_withdraw_amount: 20, 
-                        monetag_direct_link: 'https://google.com',
+                        min_referrals_req: 0, // Default 0
                         payment_methods: ["Bkash Personal"]
                     };
                 } else {
                     appSettings = s;
                 }
 
+                // Ads Setup
                 if(appSettings.monetag_interstitial_id) loadAdScript(appSettings.monetag_interstitial_id, 'interstitial');
                 if(appSettings.monetag_rewarded_id) loadAdScript(appSettings.monetag_rewarded_id, 'rewarded');
+                if(appSettings.monetag_popup_id) loadAdScript(appSettings.monetag_popup_id, 'popup');
 
+                // User Check
                 const uid = localStorage.getItem('user_id');
                 if (uid) await fetchUser(uid);
                 else showAuth();
 
+                // Referral Link Check
                 const params = new URLSearchParams(window.location.search);
                 if (params.get('ref')) { toggleAuth('signup'); document.getElementById('auth-ref').value = params.get('ref'); }
 
             } catch (e) {
-                console.error(e);
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('error-box').classList.remove('hidden');
             }
         }
 
-        // 3. AUTH LOGIC
+        // 3. AUTH SYSTEM
         function showAuth() {
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
@@ -156,12 +165,12 @@
                 login.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition";
                 signup.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition";
                 extra.classList.add('hidden');
-                btn.innerText = "LOGIN";
+                btn.innerText = "LOGIN NOW";
             } else {
                 signup.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition";
                 login.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition";
                 extra.classList.remove('hidden');
-                btn.innerText = "REGISTER";
+                btn.innerText = "CREATE ACCOUNT";
             }
         }
 
@@ -170,16 +179,15 @@
             const pass = document.getElementById('auth-pass').value;
             
             if(!phoneVal || !pass) return Swal.fire('Error', 'Fill all fields', 'warning');
-            if(phoneVal.length !== 11) return Swal.fire('Error', 'Invalid Phone Number', 'warning');
+            if(phoneVal.length !== 11) return Swal.fire('Error', 'Phone must be 11 digits', 'warning');
 
             const phone = parseInt(phoneVal);
             Swal.showLoading();
 
             try {
                 if(authMode === 'login') {
-                    const { data, error } = await supabase.from('users').select('*').eq('id', phone).eq('password', pass).single();
+                    const { data } = await supabase.from('users').select('*').eq('id', phone).eq('password', pass).single();
                     Swal.close();
-                    
                     if(data) {
                         localStorage.setItem('user_id', data.id);
                         location.reload();
@@ -230,7 +238,7 @@
             }
         }
 
-        // 4. TASK LOGIC
+        // 4. TASK LOGIC (TIMER + REFERRAL LOCK)
         document.addEventListener("visibilitychange", async () => {
             if (document.visibilityState === "visible") {
                 const start = localStorage.getItem('t_start');
@@ -242,7 +250,7 @@
                     if(diff >= REQUIRED_TIME) {
                         await addPoints(tid, rew);
                     } else {
-                        Swal.fire({icon: 'error', title: 'Task Failed', text: `Stay 15s. You stayed ${(diff/1000).toFixed(1)}s`, confirmButtonColor: '#FFD700'});
+                        Swal.fire({icon: 'error', title: 'Failed', text: `You must stay for 15 seconds!`, confirmButtonColor: '#FFD700'});
                     }
                     localStorage.removeItem('t_start'); localStorage.removeItem('t_id'); localStorage.removeItem('t_rew');
                 }
@@ -250,6 +258,20 @@
         });
 
         window.handleTask = (tid, rew, type, link) => {
+            // REFERRAL CHECK
+            const minRef = appSettings.min_referrals_req || 0;
+            const myRef = currentUser.referral_count || 0;
+            
+            if (myRef < minRef) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'Locked!',
+                    text: `You need ${minRef} referrals to unlock tasks! You have ${myRef}.`,
+                    confirmButtonColor: '#FFD700'
+                });
+            }
+
+            // TASK START
             if(type === 'direct_ad' || type === 'offer_wheel') {
                 const url = (link && link !== 'null') ? link : appSettings.monetag_direct_link;
                 if(!url) return Swal.fire('Error', 'No Link', 'error');
@@ -263,7 +285,9 @@
             }
             else if(type === 'video') {
                 if(adFuncs.rewarded) {
-                    adFuncs.rewarded().then(() => addPoints(tid, rew)).catch(() => Swal.fire('Failed', 'Watch full ad', 'error'));
+                    Swal.fire({title: 'Loading Ad...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
+                    adFuncs.rewarded().then(() => { Swal.close(); addPoints(tid, rew); })
+                    .catch(() => { Swal.close(); Swal.fire('Failed', 'Watch full ad', 'error'); });
                 } else {
                     Swal.fire('Loading', 'Ad not ready', 'warning');
                 }
@@ -275,7 +299,7 @@
         };
 
         async function addPoints(tid, rew) {
-            Swal.fire({title: 'Adding...', didOpen: () => Swal.showLoading()});
+            Swal.fire({title: 'Adding...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
             const { data: res, error } = await supabase.rpc('claim_task', {
                 p_user_id: parseInt(currentUser.id), p_task_id: parseInt(tid),
                 p_reward: parseFloat(rew), p_limit: parseInt(appSettings.daily_task_limit)
@@ -288,7 +312,7 @@
                 Swal.fire({icon: 'success', title: `+${rew} Points`, timer: 1500, showConfirmButton: false});
                 router('tasks');
             } else {
-                Swal.fire('Failed', res?.message, 'warning');
+                Swal.fire('Notice', res?.message, 'warning');
             }
         }
 
@@ -306,10 +330,14 @@
             if(amt < appSettings.min_withdraw_amount) return Swal.fire('Error', `Min ${appSettings.min_withdraw_amount} TK`, 'warning');
             if(currentUser.balance < pts) return Swal.fire('Error', `Need ${pts} Points`, 'error');
 
+            document.getElementById('w-btn').innerText = "Processing...";
+            
             const { data: res, error } = await supabase.rpc('process_withdrawal', {
                 p_user_id: parseInt(currentUser.id), p_method: method,
                 p_number: num, p_amount_bdt: amt, p_points_needed: pts
             });
+
+            document.getElementById('w-btn').innerText = "WITHDRAW";
 
             if(res && res.success) {
                 currentUser.balance -= pts;
@@ -321,7 +349,7 @@
             }
         }
 
-        // 6. UI
+        // 6. UI & HELPERS
         function loadAdScript(zoneId, type) {
             const s = document.createElement('script');
             s.src = '//libtl.com/sdk.js'; s.dataset.zone = zoneId; s.dataset.sdk = 'show_' + zoneId;
@@ -337,8 +365,8 @@
         }
 
         function router(page) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('text-[#FFD700]'));
-            document.getElementById('btn-'+page).classList.add('text-[#FFD700]');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-[#FFD700]'));
+            document.getElementById('btn-'+page).classList.add('active', 'text-[#FFD700]');
             
             const c = document.getElementById('main-app');
             if(page === 'home') renderHome(c);
@@ -348,14 +376,26 @@
             else if(page === 'refer') renderRefer(c);
         }
 
+        // 7. PAGE RENDERERS
         function renderHome(c) {
             c.innerHTML = `
-            <div class="glass-panel p-6 rounded-3xl text-center mt-4 border-t border-white/10">
+            <div class="glass-panel p-6 rounded-3xl text-center mt-4 border-t border-white/10 shadow-lg">
                 <h1 class="text-5xl font-bold text-white mb-2">${Math.floor(currentUser.balance)}</h1>
-                <p class="text-xs text-[#FFD700] tracking-widest">POINTS</p>
-                <button onclick="router('tasks')" class="mt-6 w-full py-3 rounded-xl gold-gradient text-black font-bold">START WORK</button>
+                <p class="text-xs text-[#FFD700] tracking-widest uppercase">Available Points</p>
+                <button onclick="router('tasks')" class="mt-6 w-full py-4 rounded-2xl gold-gradient text-black font-bold uppercase shadow-lg active:scale-95 transition">START WORK</button>
             </div>
-            ${appSettings.home_banner_url ? `<img src="${appSettings.home_banner_url}" class="w-full h-32 object-cover rounded-xl mt-4 border border-white/10">` : ''}`;
+            
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center border border-white/5">
+                    <span class="text-2xl font-bold text-white">${currentUser.referral_count}</span>
+                    <span class="text-[10px] text-gray-400 uppercase mt-1">Total Refers</span>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center border border-white/5">
+                    <span class="text-2xl font-bold text-green-400">Active</span>
+                    <span class="text-[10px] text-gray-400 uppercase mt-1">Account Status</span>
+                </div>
+            </div>
+            ${appSettings.home_banner_url ? `<img src="${appSettings.home_banner_url}" class="w-full h-32 object-cover rounded-xl mt-6 border border-white/10 shadow-lg">` : ''}`;
         }
 
         async function renderTasks(c) {
@@ -365,20 +405,48 @@
             
             const counts = {}; if(logs) logs.forEach(l => counts[l.task_id] = (counts[l.task_id] || 0) + 1);
             const limit = appSettings.daily_task_limit;
+            
+            // Check Lock
+            const minRef = appSettings.min_referrals_req || 0;
+            const myRef = currentUser.referral_count || 0;
+            const isLocked = myRef < minRef;
 
-            let html = `<div class="space-y-4 mt-4 pb-20">`;
+            let html = ``;
+            
+            // Lock Message
+            if(isLocked) {
+                html += `
+                <div class="glass-panel p-4 rounded-xl border border-red-500/30 bg-red-500/5 mb-4 text-center">
+                    <i class="fas fa-lock text-red-500 text-2xl mb-2"></i>
+                    <h3 class="text-red-400 font-bold">Tasks Locked!</h3>
+                    <p class="text-xs text-gray-300 mt-1">You need <span class="text-[#FFD700] font-bold">${minRef} referrals</span> to unlock tasks.</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Current: ${myRef} / ${minRef}</p>
+                </div>`;
+            }
+
+            html += `<div class="space-y-4 pb-20">`;
             tasks.forEach(t => {
                 const done = counts[t.id] || 0;
-                const disabled = done >= limit;
-                let icon = t.task_type === 'video' ? 'play-circle' : 'globe';
+                const disabled = done >= limit || isLocked; // Lock if limit reached OR referral lock
+                let icon = (t.task_type === 'video' || t.task_type === 'rewarded_ads') ? 'play-circle' : 'globe';
                 
                 html += `
-                <div class="glass-panel p-4 rounded-xl flex justify-between items-center ${disabled ? 'opacity-50' : ''}">
+                <div class="glass-panel p-4 rounded-xl flex justify-between items-center ${disabled ? 'opacity-50 grayscale' : ''}">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-[#FFD700]"><i class="fas fa-${icon}"></i></div>
-                        <div><h4 class="font-bold text-white">${t.title}</h4><span class="text-xs text-[#FFD700]">+${t.reward} • ${done}/${limit}</span></div>
+                        <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#FFD700] text-xl border border-white/5"><i class="fas fa-${icon}"></i></div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${t.title}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-[#FFD700] font-bold border border-[#FFD700]/30 px-2 py-0.5 rounded">+${t.reward}</span>
+                                <span class="text-[10px] text-gray-500">${done}/${limit}</span>
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="handleTask(${t.id}, ${t.reward}, '${t.task_type}', '${t.link}')" ${disabled?'disabled':''} class="px-5 py-2 rounded-lg bg-[#FFD700] text-black font-bold text-xs">${disabled ? 'Done' : 'Start'}</button>
+                    <button onclick="handleTask(${t.id}, ${t.reward}, '${t.task_type}', '${t.link}')" 
+                        ${disabled?'disabled':''} 
+                        class="px-5 py-2.5 rounded-xl text-xs font-bold gold-gradient text-black shadow-lg active:scale-95 transition">
+                        ${isLocked ? '<i class="fas fa-lock"></i>' : (done >= limit ? 'Done' : 'Visit')}
+                    </button>
                 </div>`;
             });
             c.innerHTML = html + `</div>`;
@@ -390,14 +458,14 @@
             
             c.innerHTML = `
             <div class="glass-panel p-6 rounded-2xl text-center mt-4">
-                <h1 class="text-4xl font-bold text-white">\u09F3 ${(currentUser.balance * appSettings.conversion_rate).toFixed(2)}</h1>
+                <h1 class="text-4xl font-bold text-white mb-1">\u09F3 ${(currentUser.balance * appSettings.conversion_rate).toFixed(2)}</h1>
                 <p class="text-xs text-gray-400">Min: ${appSettings.min_withdraw_amount} TK</p>
             </div>
             <div class="space-y-4 mt-6">
                 <select id="w-method" class="custom-input">${opts}</select>
                 <input type="number" id="w-num" placeholder="Number" class="custom-input">
                 <input type="number" id="w-amt" placeholder="Amount" class="custom-input">
-                <button onclick="processWithdraw()" class="w-full py-3 rounded-xl gold-gradient text-black font-bold">WITHDRAW</button>
+                <button id="w-btn" onclick="processWithdraw()" class="w-full py-3 rounded-xl gold-gradient text-black font-bold">WITHDRAW</button>
             </div>`;
         }
 
@@ -406,18 +474,31 @@
             const { data: refers } = await supabase.from('users').select('first_name, created_at').eq('referred_by', currentUser.id);
             
             let hist = '';
-            if(refers) refers.forEach(u => hist += `<div class="flex justify-between p-2 bg-white/5 rounded mb-1"><span class="text-xs">${u.first_name}</span><span class="text-[10px] text-gray-400">${new Date(u.created_at).toLocaleDateString()}</span></div>`);
+            if(refers && refers.length > 0) {
+                refers.forEach(u => {
+                    hist += `
+                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5 mb-2">
+                        <span class="text-sm font-bold text-white">${u.first_name}</span>
+                        <span class="text-[10px] text-gray-400">${new Date(u.created_at).toLocaleDateString()}</span>
+                    </div>`;
+                });
+            } else {
+                hist = `<div class="text-center text-gray-500 text-xs py-4">No referrals yet</div>`;
+            }
 
             c.innerHTML = `
-            <div class="glass-panel p-6 rounded-2xl text-center mt-4 border border-[#FFD700]/30">
+            <div class="glass-panel p-6 rounded-2xl text-center mt-4 border border-[#FFD700]/30 shadow-lg">
                 <h2 class="text-2xl font-bold text-white">Refer & Earn</h2>
-                <p class="text-xs text-gray-400 mt-2">Bonus: ${appSettings.referral_bonus} Points</p>
+                <p class="text-xs text-gray-400 mt-2">Get ${appSettings.referral_bonus} points per referral!</p>
             </div>
-            <div class="glass-panel p-3 rounded-xl mt-6 flex items-center gap-2 bg-black/30">
-                <input type="text" value="${link}" readonly class="bg-transparent text-xs w-full text-white" id="ref-link">
-                <button onclick="navigator.clipboard.writeText('${link}'); Swal.fire('Copied', '', 'success')" class="p-2 bg-[#FFD700] rounded text-black"><i class="fas fa-copy"></i></button>
+            <div class="glass-panel p-3 rounded-xl mt-6 flex items-center gap-3 bg-black/30 border border-white/10">
+                <input type="text" value="${link}" readonly class="bg-transparent text-xs w-full text-white outline-none" id="ref-link">
+                <button onclick="navigator.clipboard.writeText('${link}'); Swal.fire('Copied', '', 'success')" class="p-2.5 bg-[#FFD700] rounded-lg text-black"><i class="fas fa-copy"></i></button>
             </div>
-            <div class="mt-4"><h3 class="text-sm font-bold mb-2">My Referrals (${refers?refers.length:0})</h3>${hist}</div>`;
+            <div class="mt-6">
+                <h3 class="text-sm font-bold text-gray-400 mb-3 uppercase tracking-wider">Referral History (${refers ? refers.length : 0})</h3>
+                <div class="overflow-y-auto max-h-60 space-y-1 pr-1 custom-scroll">${hist}</div>
+            </div>`;
         }
 
         function renderHistory(c) {
@@ -427,15 +508,19 @@
                 let html = `<div class="space-y-3 mt-4">`;
                 if(!data || data.length === 0) html = `<div class="text-center text-gray-500 mt-20">Empty</div>`;
                 else data.forEach(i => {
-                    html += `<div class="glass-panel p-4 rounded-xl flex justify-between items-center">
+                    let st = i.status;
+                    let col = st==='paid'?'text-green-400':(st==='rejected'?'text-red-400':'text-yellow-400');
+                    html += `
+                    <div class="glass-panel p-4 rounded-xl flex justify-between items-center border-l-4 ${st==='paid'?'border-green-500':(st==='rejected'?'border-red-500':'border-yellow-500')}">
                         <div><h4 class="font-bold text-white">\u09F3 ${i.amount_bdt}</h4><p class="text-[10px] text-gray-400">${i.method}</p></div>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-white/10 ${i.status==='paid'?'text-green-400':'text-yellow-400'}">${i.status}</span>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-white/10 uppercase ${col}">${st}</span>
                     </div>`;
                 });
                 c.innerHTML = html + `</div>`;
             });
         }
 
+        // Start
         initApp();
     </script>
 </body>
