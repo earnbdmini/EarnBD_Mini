@@ -1,4 +1,4 @@
-// 1. CONFIGURATION
+// 1. CONFIGURATION & SETUP
 const SUPABASE_URL = 'https://wnmwvbeydsrehtsnkfoc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndubXd2YmV5ZHNyZWh0c25rZm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzMDg4MzIsImV4cCI6MjA3OTg4NDgzMn0.4vSObxBEr8r11-dqkp9y6bVroMVoSTEnIOTF8Vo8sxk';
 
@@ -9,47 +9,72 @@ let currentUser = null;
 let appSettings = {};
 let adFuncs = { interstitial: null, rewarded: null, popup: null };
 let authMode = 'login';
-const REQUIRED_TIME = 15000; // ১৫ সেকেন্ড
+const REQUIRED_TIME = 15000; // ১৫ সেকেন্ড টাইমার
 
-// --- SECURITY: DEVICE FINGERPRINT (One Device One Account) ---
+// --- ADVANCED DEVICE FINGERPRINT (CANVAS) ---
+// এটি ব্রাউজার ডাটা ক্লিয়ার করলেও সহজে বদলায় না। হ্যাক আটকাতে এটি ব্যবহার করা হয়েছে।
 function getDeviceFingerprint() {
-    // এটি ইউজার এজেন্ট এবং স্ক্রিনের তথ্যের উপর ভিত্তি করে একটি ইউনিক আইডি তৈরি করবে
-    const raw = navigator.userAgent + navigator.language + screen.width + screen.height + screen.colorDepth;
-    let hash = 0;
-    for (let i = 0; i < raw.length; i++) {
-        const char = raw.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const txt = 'PREMIUM_REWARDS_SECURE_V2';
+        ctx.textBaseline = "top";
+        ctx.font = "14px 'Arial'";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = "#069";
+        ctx.fillText(txt, 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.fillText(txt, 4, 17);
+        
+        const raw = canvas.toDataURL() + navigator.userAgent + navigator.hardwareConcurrency + screen.colorDepth + screen.width;
+        
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+            const char = raw.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return 'DEV-' + Math.abs(hash);
+    } catch (e) {
+        return 'DEV-' + Date.now(); // ফলব্যাক যদি ক্যানভাস কাজ না করে
     }
-    return 'DEV-' + Math.abs(hash);
 }
 
 // 2. INITIALIZATION
 async function initApp() {
     try {
-        // সেটিংস লোড
-        const { data: s, error } = await supabase.from('settings').select('*').single();
+        // ১. সেটিংস লোড
+        const { data: s } = await supabase.from('settings').select('*').single();
         appSettings = s || { 
-            conversion_rate: 1, 
+            conversion_rate: 1000, 
             min_withdraw_amount: 20, 
-            monetag_direct_link: 'https://google.com',
-            payment_methods: ["Bkash Personal"]
+            device_lock_active: true 
         };
 
-        // অ্যাড স্ক্রিপ্ট লোড
+        // ২. অ্যাড লোড
         if(appSettings.monetag_interstitial_id) loadAdScript(appSettings.monetag_interstitial_id, 'interstitial');
         if(appSettings.monetag_rewarded_id) loadAdScript(appSettings.monetag_rewarded_id, 'rewarded');
         if(appSettings.monetag_popup_id) loadAdScript(appSettings.monetag_popup_id, 'popup');
 
-        // অটো লগইন চেক
+        // ৩. লগইন এবং ডিভাইস চেক
         const uid = localStorage.getItem('user_id');
-        const storedDevice = localStorage.getItem('device_id');
-        const currentDevice = getDeviceFingerprint();
+        const storedFP = localStorage.getItem('device_fp');
+        const currentFP = getDeviceFingerprint();
 
         if (uid) {
-            // সিকিউরিটি চেক: যদি লোকাল স্টোরেজের ডিভাইস আইডির সাথে বর্তমান আইডি না মিলে, লগআউট করাবে
-            if(storedDevice && storedDevice !== currentDevice) {
-                logout();
+            // যদি ডিভাইস লক অন থাকে এবং আগের ডিভাইসের সাথে বর্তমান ডিভাইসের মিল না থাকে
+            if(appSettings.device_lock_active && storedFP && storedFP !== currentFP) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Security Alert',
+                    text: 'You cannot use this account on a new device. Please login from your original device.',
+                    confirmButtonColor: '#FFD700',
+                    allowOutsideClick: false
+                }).then(() => {
+                    logout();
+                });
                 return;
             }
             await fetchUser(uid);
@@ -57,14 +82,14 @@ async function initApp() {
             showAuth();
         }
 
-        // রেফারেল হ্যান্ডলিং
+        // ৪. রেফারেল লিংক হ্যান্ডলিং
         const params = new URLSearchParams(window.location.search);
         if (params.get('ref')) { 
             toggleAuth('signup'); 
             const refInput = document.getElementById('auth-ref');
-            if(refInput) {
-                refInput.value = params.get('ref');
-                refInput.readOnly = true; // রেফার কোড এডিট করা যাবে না
+            if(refInput) { 
+                refInput.value = params.get('ref'); 
+                refInput.readOnly = true; 
             }
         }
 
@@ -75,7 +100,7 @@ async function initApp() {
     }
 }
 
-// 3. AUTHENTICATION (FIXED)
+// 3. AUTHENTICATION LOGIC
 function showAuth() {
     document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('auth-screen').classList.remove('hidden');
@@ -102,60 +127,48 @@ function toggleAuth(mode) {
     }
 }
 
-// এই ফাংশনটি এখন HTML থেকে সঠিকভাবে কল হবে
 async function submitAuth() {
-    const phoneInput = document.getElementById('auth-phone').value.trim();
+    // এখানে .trim() ব্যবহার করা হয়েছে, parseInt() বাদ দেওয়া হয়েছে যাতে 0 থাকে
+    const phone = document.getElementById('auth-phone').value.trim();
     const pass = document.getElementById('auth-pass').value.trim();
     
-    if(!phoneInput || !pass) return Swal.fire('Error', 'Please fill all fields', 'warning');
-    if(phoneInput.length < 11) return Swal.fire('Error', 'Invalid Phone Number', 'warning');
+    if(!phone || !pass) return Swal.fire('Error', 'Please fill all fields', 'warning');
+    if(phone.length < 11) return Swal.fire('Error', 'Phone number must be at least 11 digits', 'warning');
 
-    // Phone number handling (Remove leading 0 logic if your DB stores as Int)
-    // যদি আপনার ডাটাবেসে ফোন নম্বরটি 'text' বা 'varchar' হয় তবে parseInt সরাবেন না।
-    // আপনার আগের কোড অনুযায়ী আপনি Int ব্যবহার করছেন, তাই আমি parseInt রাখছি।
-    // কিন্তু মনে রাখবেন, Int হলে '017' হয়ে যাবে '17'। 
-    const phone = parseInt(phoneInput); 
+    const deviceId = getDeviceFingerprint(); 
 
-    Swal.fire({
-        title: 'Processing...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-    });
+    Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     try {
         if (authMode === 'login') {
-            // LOGIN logic
+            // LOGIN Check
             const { data, error } = await supabase.from('users').select('*').eq('id', phone).eq('password', pass).single();
             
             if (data) {
-                // Device Check during Login
-                const currentDevice = getDeviceFingerprint();
-                
-                // যদি ইউজারের আগের ডিভাইস আইডি থাকে এবং তা না মিলে
-                if(data.device_id && data.device_id !== currentDevice) {
+                // ডিভাইস চেক (যদি ডাটাবেসে ডিভাইস আইডি সেট করা থাকে)
+                if(appSettings.device_lock_active && data.device_id && data.device_id !== deviceId) {
                     Swal.close();
-                    return Swal.fire('Security Alert', 'You cannot login from a different device. One device per account policy.', 'error');
+                    return Swal.fire('Login Denied', 'This account is locked to another device.', 'error');
                 }
 
                 localStorage.setItem('user_id', data.id);
-                localStorage.setItem('device_id', currentDevice);
+                localStorage.setItem('device_fp', deviceId); // বর্তমান ডিভাইস আইডি সেভ
                 Swal.close();
                 location.reload(); 
             } else {
                 Swal.close();
-                Swal.fire('Error', 'Invalid Phone or Password', 'error');
+                Swal.fire('Login Failed', 'Invalid Phone Number or Password', 'error');
             }
         } else {
-            // REGISTER logic
+            // REGISTER Check
             const name = document.getElementById('auth-name').value.trim();
             const refInput = document.getElementById('auth-ref').value.trim();
-            const deviceId = getDeviceFingerprint(); 
             
-            if (!name) { Swal.close(); return Swal.fire('Error', 'Enter your Name', 'warning'); }
+            if (!name) { Swal.close(); return Swal.fire('Error', 'Enter your Full Name', 'warning'); }
+            
+            const refID = (refInput.length >= 11) ? refInput : null; 
 
-            const refID = (refInput && !isNaN(refInput)) ? parseInt(refInput) : null;
-
-            // RPC কল (ডাটাবেস সাইডে চেক হবে একই ডিভাইসে একাধিক একাউন্ট আছে কিনা)
+            // RPC কল (ডাটাবেস সাইডে চেক হবে মাল্টিপল একাউন্ট আছে কিনা)
             const { data: res, error } = await supabase.rpc('handle_new_user', {
                 p_phone: phone, 
                 p_pass: pass, 
@@ -172,41 +185,44 @@ async function submitAuth() {
 
             if (res && res.success) {
                 localStorage.setItem('user_id', phone);
-                localStorage.setItem('device_id', deviceId);
+                localStorage.setItem('device_fp', deviceId);
                 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Account Created',
-                    text: 'Welcome to Premium Rewards!',
+                    title: 'Welcome!',
+                    text: 'Account created successfully.',
                     confirmButtonColor: '#FFD700'
-                }).then(() => {
-                    location.reload();
-                });
+                }).then(() => location.reload());
             } else {
-                // এখানে 'Device limit reached' মেসেজ শো করবে যদি RPC থেকে আসে
-                Swal.fire('Registration Failed', res?.message || 'Error occurred', 'error');
+                // এখানে 'Device Limit Reached' মেসেজ আসবে
+                Swal.fire('Registration Failed', res?.message || 'Unknown Error', 'error');
             }
         }
     } catch (e) {
         Swal.close();
         console.error(e);
-        Swal.fire('Error', 'Network Error', 'error');
+        Swal.fire('Error', 'Network Connection Error', 'error');
     }
 }
 
 function logout() {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('device_id');
+    localStorage.clear(); // সব ডাটা ক্লিয়ার
     location.reload();
 }
 
-// ইউজারের তথ্য আনা
+// 4. USER DATA FETCHING
 async function fetchUser(uid) {
-    const { data } = await supabase.from('users').select('*').eq('id', uid).single();
+    const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
+    
     if (data) {
         if (data.is_banned) {
             localStorage.clear();
-            Swal.fire('Banned', 'Your account has been banned due to suspicious activity.', 'error').then(() => location.reload());
+            Swal.fire({
+                icon: 'error',
+                title: 'BANNED',
+                text: 'Your account has been suspended for violating rules.',
+                allowOutsideClick: false
+            }).then(() => location.reload());
             return;
         }
         currentUser = data;
@@ -219,12 +235,13 @@ async function fetchUser(uid) {
         document.getElementById('main-app').classList.remove('hidden');
         router('home');
     } else {
-        localStorage.removeItem('user_id');
+        // যদি ইউজার আইডি ভুল হয় বা ডাটাবেস থেকে ডিলিট হয়ে যায়
+        localStorage.clear();
         location.reload();
     }
 }
 
-// 4. TASK LOGIC & HACK PREVENTION
+// 5. TASK SYSTEM (টাইমার এবং রিওয়ার্ড)
 document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState === "visible") {
         const start = localStorage.getItem('t_start');
@@ -234,7 +251,7 @@ document.addEventListener("visibilitychange", async () => {
         if (start && tid) {
             const diff = Date.now() - parseInt(start);
             
-            // ১৫ সেকেন্ড চেক
+            // ১৫ সেকেন্ড ভ্যালিডেশন
             if (diff >= REQUIRED_TIME) {
                 await addPoints(tid, rew);
             } else {
@@ -254,10 +271,10 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 window.handleTask = (tid, rew, type, link) => {
-    // A. Direct Link / Offer Wheel
-    if(type === 'direct_ad' || type === 'offer_wheel') {
-        const url = (link && link !== 'null') ? link : appSettings.monetag_direct_link;
-        if(!url) return Swal.fire('Error', 'Link Not Configured', 'error');
+    // A. Direct Link / Website
+    if(type === 'direct_ad' || type === 'website' || type === 'offer_wheel') {
+        const url = (link && link !== 'null' && link !== '') ? link : appSettings.monetag_direct_link;
+        if(!url) return Swal.fire('Error', 'Link Not Available', 'error');
 
         // স্টার্ট টাইম সেভ
         localStorage.setItem('t_start', Date.now());
@@ -268,32 +285,32 @@ window.handleTask = (tid, rew, type, link) => {
         
         Swal.fire({
             title: 'Task Started',
-            text: 'Stay on the page for 15 seconds to get reward.',
+            text: 'Wait 15 seconds on the website to get reward.',
             timer: 3000,
             showConfirmButton: false
         });
     }
-    // B. Rewarded Video Ad
+    // B. Video Ad
     else if(type === 'video' || type === 'rewarded_ads') {
         if(adFuncs.rewarded && window[adFuncs.rewarded]) {
             Swal.fire({title: 'Loading Ad...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
             
             window[adFuncs.rewarded]().then(() => {
                 Swal.close();
-                // অ্যাড সম্পূর্ণ দেখলে পয়েন্ট অ্যাড হবে
+                // ভিডিও পুরো দেখলে পয়েন্ট অ্যাড হবে
                 addPoints(tid, rew);
             }).catch(e => {
                 Swal.close();
                 Swal.fire('Failed', 'You closed the ad early!', 'error');
             });
         } else {
-            Swal.fire('Loading', 'Ad is not ready yet. Please wait...', 'warning');
+            Swal.fire('Ad Not Ready', 'Please try again in a few seconds.', 'warning');
         }
     }
-    // C. Other (Telegram etc.)
+    // C. Other Links
     else {
         if(link && link !== 'null') window.open(link, '_blank');
-        setTimeout(() => addPoints(tid, rew), 5000); // টেলিগ্রামের জন্য ৫ সেকেন্ড
+        setTimeout(() => addPoints(tid, rew), 5000);
     }
 };
 
@@ -305,9 +322,9 @@ async function addPoints(tid, rew) {
         const rewardAmount = parseFloat(rew);
         const limit = parseInt(appSettings.daily_task_limit || 15);
 
-        // RPC CALL ensures limit checks happen on server, preventing multiple adds
+        // RPC CALL - সার্ভার সাইডে লিমিট চেক হবে
         const { data: res, error } = await supabase.rpc('claim_task', {
-            p_user_id: parseInt(currentUser.id),
+            p_user_id: currentUser.id, // Phone Number as ID (String)
             p_task_id: taskId,
             p_reward: rewardAmount,
             p_limit: limit
@@ -333,7 +350,10 @@ async function addPoints(tid, rew) {
                 showConfirmButton: false
             });
             
-            router('tasks'); // রিফ্রেশ টাস্ক লিস্ট
+            // টাস্ক পেজে থাকলে রিফ্রেশ করুন
+            if(document.getElementById('btn-tasks').classList.contains('active')) {
+                router('tasks');
+            }
         } else {
             Swal.fire('Limit Reached', res?.message, 'warning');
         }
@@ -343,28 +363,27 @@ async function addPoints(tid, rew) {
     }
 }
 
-// 5. WITHDRAW LOGIC (Anti-Cheat: Server side validation via RPC)
+// 6. WITHDRAWAL SYSTEM
 async function processWithdraw() {
-    const num = document.getElementById('w-num').value;
+    const num = document.getElementById('w-num').value.trim();
     const amtVal = document.getElementById('w-amt').value;
     const method = document.getElementById('w-method').value;
 
     if(!num || !amtVal) return Swal.fire('Error', 'Please fill all fields', 'warning');
 
     const amt = parseFloat(amtVal);
-    const pts = parseFloat((amt / appSettings.conversion_rate).toFixed(2));
+    const pts = parseFloat((amt * appSettings.conversion_rate).toFixed(2)); // ১ টাকা = ১০০০ পয়েন্ট (সেটিংস অনুযায়ী)
 
-    if(amt < appSettings.min_withdraw_amount) return Swal.fire('Error', `Minimum withdraw amount is ${appSettings.min_withdraw_amount} Taka`, 'warning');
-    if(currentUser.balance < pts) return Swal.fire('Error', `Insufficient Balance! You need ${pts} Points`, 'error');
+    if(amt < appSettings.min_withdraw_amount) return Swal.fire('Error', `Minimum withdraw is ${appSettings.min_withdraw_amount} Taka`, 'warning');
+    if(currentUser.balance < pts) return Swal.fire('Error', `Insufficient Balance! You need ${pts} Points for ${amt} TK`, 'error');
 
     const btn = document.getElementById('w-btn');
     btn.innerText = "Processing...";
     btn.disabled = true;
     
     try {
-        // RPC: ensures atomic transaction (deduct balance & insert history together)
         const { data: res, error } = await supabase.rpc('process_withdrawal', {
-            p_user_id: parseInt(currentUser.id),
+            p_user_id: currentUser.id,
             p_method: method,
             p_number: num,
             p_amount_bdt: amt,
@@ -380,7 +399,7 @@ async function processWithdraw() {
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
-                text: 'Withdrawal Request Submitted!',
+                text: 'Withdrawal Request Submitted Successfully!',
                 confirmButtonColor: '#FFD700'
             });
             router('history');
@@ -393,14 +412,16 @@ async function processWithdraw() {
     }
 }
 
-// 6. HELPER FUNCTIONS
+// 7. UI HELPER FUNCTIONS
 function loadAdScript(zoneId, type) {
-    const s = document.createElement('script');
-    s.src = '//libtl.com/sdk.js';
-    s.dataset.zone = zoneId;
-    s.dataset.sdk = 'show_' + zoneId;
-    s.onload = () => adFuncs[type] = window['show_' + zoneId];
-    document.head.appendChild(s);
+    try {
+        const s = document.createElement('script');
+        s.src = '//libtl.com/sdk.js';
+        s.dataset.zone = zoneId;
+        s.dataset.sdk = 'show_' + zoneId;
+        s.onload = () => adFuncs[type] = window['show_' + zoneId];
+        document.head.appendChild(s);
+    } catch(e) { console.log('Ad block detected'); }
 }
 
 function updateUI() {
@@ -411,6 +432,7 @@ function updateUI() {
     document.getElementById('user-photo').src = photo;
 }
 
+// 8. ROUTING & PAGE RENDERING
 function router(page) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-[#FFD700]'));
     const btn = document.getElementById('btn-'+page);
@@ -424,7 +446,6 @@ function router(page) {
     else if(page === 'refer') renderRefer(c);
 }
 
-// 7. PAGES UI RENDERING
 function renderHome(c) {
     c.innerHTML = `
     <div class="glass-panel p-6 rounded-3xl text-center mt-4 border-t border-white/10 shadow-lg">
@@ -492,7 +513,8 @@ async function renderTasks(c) {
 }
 
 function renderWallet(c) {
-    const bdt = (currentUser.balance * appSettings.conversion_rate).toFixed(2);
+    // এখানে পয়েন্টকে টাকায় কনভার্ট করে দেখানো হচ্ছে ( ১ টাকা = ১০০০ পয়েন্ট হলে ১০০০ দিয়ে ভাগ)
+    const bdt = (currentUser.balance / appSettings.conversion_rate).toFixed(2);
     
     let opts = ''; 
     if(appSettings.payment_methods) {
@@ -518,7 +540,7 @@ function renderWallet(c) {
         </div>
         <div>
             <label class="text-xs text-gray-400 ml-1">Amount (BDT)</label>
-            <input type="number" id="w-amt" placeholder="Amount" class="custom-input">
+            <input type="number" id="w-amt" placeholder="Example: 50" class="custom-input">
         </div>
         
         <button id="w-btn" onclick="processWithdraw()" class="w-full py-4 rounded-xl gold-gradient text-black font-bold mt-4 shadow-lg active:scale-95 transition">WITHDRAW REQUEST</button>
@@ -528,17 +550,18 @@ function renderWallet(c) {
 async function renderRefer(c) {
     const link = `${location.origin}${location.pathname}?ref=${currentUser.id}`;
     
-    // রেফার লিস্ট আনা
     const { data: refers } = await supabase.from('users').select('first_name, created_at, id').eq('referred_by', currentUser.id).order('created_at', {ascending: false});
     
     let hist = '';
     if(refers && refers.length > 0) {
         refers.forEach(u => {
+            // ফোন নম্বরের মাঝের অংশ লুকিয়ে রাখা (গোপনীয়তার জন্য)
+            const maskedPhone = u.id.substring(0, 3) + '****' + u.id.substring(7);
             hist += `
             <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5 mb-2">
                 <div>
                     <p class="text-sm font-bold text-white">${u.first_name}</p>
-                    <p class="text-[10px] text-gray-500">${u.id}</p>
+                    <p class="text-[10px] text-gray-500">${maskedPhone}</p>
                 </div>
                 <p class="text-[10px] text-gray-400">${new Date(u.created_at).toLocaleDateString()}</p>
             </div>`;
