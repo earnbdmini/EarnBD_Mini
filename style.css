@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #0f0f0f;
+    color: #ffffff;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+
+/* Gold Theme */
+.gold-gradient {
+    background: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #d4af37 100%);
+    color: #000;
+}
+
+.gold-text {
+    background: linear-gradient(to right, #FFD700, #FDB931);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Glass Effect */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Main Content Scroll Fix */
+#main-app {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    padding-bottom: 130px;
+    scrollbar-width: none;
+}
+
+#main-app::-webkit-scrollbar {
+    display: none;
+}
+
+/* Navigation Bar */
+.nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #6b7280;
+    transition: 0.3s;
+}
+
+.nav-item.active {
+    color: #FFD700;
+    transform: scale(1.1);
+}
+
+/* Inputs */
+.custom-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+select.custom-input option {
+    background: #1a1a1a;
+    color: white;
+}
+
+/* Loader */
+.loader {
+    border: 4px solid #333;
+    border-top: 4px solid #FFD700;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* SweetAlert Dark Mode Fix */
+div:where(.swal2-container) div:where(.swal2-popup) {
+    background: #1a1a1a !important;
+    border: 1px solid #333;
+    color: #fff;
+}
