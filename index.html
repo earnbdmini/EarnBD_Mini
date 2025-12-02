@@ -11,76 +11,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- STYLES -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-        }
-
-        /* Gold Theme */
-        .gold-gradient { background: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #d4af37 100%); color: #000; }
-        .gold-text { background: linear-gradient(to right, #FFD700, #FDB931); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* Glass Effect */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* Main Content Scroll Fix */
-        #main-app {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            padding-bottom: 130px; /* Navigation বার যাতে কন্টেন্ট না ঢাকে */
-            scrollbar-width: none;
-        }
-        #main-app::-webkit-scrollbar { display: none; }
-
-        /* Navigation Bar */
-        .nav-container { display: flex; justify-content: space-around; align-items: center; height: 100%; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #6b7280; transition: 0.3s; }
-        .nav-item.active { color: #FFD700; transform: scale(1.1); }
-
-        /* Inputs */
-        .custom-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
-        select.custom-input option { background: #1a1a1a; color: white; }
-
-        /* Loader */
-        .loader { border: 4px solid #333; border-top: 4px solid #FFD700; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* SweetAlert Dark Mode Fix */
-        div:where(.swal2-container) div:where(.swal2-popup) { background: #1a1a1a !important; border: 1px solid #333; color: #fff; }
-    </style>
+    <!-- EXTERNAL CSS LINK -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 1. LOADING SCREEN -->
+    <!-- LOADING SCREEN -->
     <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f0f0f]">
         <div class="loader mb-4"></div>
-        <h2 class="text-xl font-bold gold-text tracking-widest">EARN PRO</h2>
-        <p class="text-xs text-gray-500 mt-2">Loading Resources...</p>
-        <div id="error-box" class="hidden mt-4 text-center">
-            <p class="text-red-500 text-xs mb-2">Connection Failed</p>
-            <button onclick="location.reload()" class="bg-white/10 px-4 py-2 rounded text-white text-xs border border-white/10">Retry</button>
-        </div>
+        <h2 class="text-xl font-bold gold-text tracking-widest">LOADING...</h2>
+        <div id="error-box" class="hidden mt-4 text-center"><button onclick="location.reload()" class="bg-white/10 px-4 py-2 rounded text-white text-xs border border-white/10">Retry Connection</button></div>
     </div>
 
-    <!-- 2. AUTH SCREEN -->
+    <!-- AUTH SCREEN -->
     <div id="auth-screen" class="hidden fixed inset-0 z-40 bg-[#0f0f0f] flex flex-col items-center justify-center p-6">
         <div class="mb-8 text-center">
             <h1 class="text-4xl font-bold gold-text">WELCOME</h1>
@@ -88,13 +31,11 @@
         </div>
         
         <div class="glass-panel p-6 rounded-2xl w-full max-w-sm border border-[#FFD700]/20 shadow-2xl">
-            <!-- Toggle Buttons -->
             <div class="flex mb-6 bg-white/5 rounded-lg p-1">
                 <button onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition">Login</button>
                 <button onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition">Register</button>
             </div>
             
-            <!-- Inputs -->
             <div id="auth-form">
                 <input type="number" id="auth-phone" placeholder="Phone Number (11 digits)" class="custom-input">
                 <input type="password" id="auth-pass" placeholder="Password" class="custom-input">
@@ -109,9 +50,7 @@
         </div>
     </div>
 
-    <!-- 3. MAIN APP INTERFACE -->
-    
-    <!-- Top Header -->
+    <!-- MAIN INTERFACE -->
     <header class="glass-panel border-b-0 rounded-b-3xl p-4 z-40 shrink-0 hidden" id="app-header">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -130,10 +69,8 @@
         </div>
     </header>
 
-    <!-- Dynamic Content Area -->
     <div id="main-app" class="hidden"></div>
 
-    <!-- Bottom Navigation -->
     <nav class="glass-panel rounded-t-3xl pb-6 pt-3 z-50 shrink-0 hidden fixed bottom-0 w-full bg-[#0f0f0f]" id="app-nav">
         <div class="nav-container">
             <div onclick="router('home')" class="nav-item active" id="btn-home"><i class="fas fa-home text-xl"></i><span>Home</span></div>
@@ -144,446 +81,7 @@
         </div>
     </nav>
 
-    <!-- 4. JAVASCRIPT LOGIC -->
-    <script>
-        // --- CONFIGURATION ---
-        const SUPABASE_URL = 'https://wnmwvbeydsrehtsnkfoc.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndubXd2YmV5ZHNyZWh0c25rZm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzMDg4MzIsImV4cCI6MjA3OTg4NDgzMn0.4vSObxBEr8r11-dqkp9y6bVroMVoSTEnIOTF8Vo8sxk';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // --- GLOBAL VARIABLES ---
-        let currentUser = null;
-        let appSettings = {};
-        let adFuncs = { interstitial: null, rewarded: null, popup: null };
-        let authMode = 'login';
-        const REQUIRED_TIME = 15000; // 15 Seconds Task Timer
-
-        // --- DEVICE ID (Anti-Cheat) ---
-        function getDeviceFingerprint() { 
-            return 'DEV-' + navigator.userAgent.replace(/\D+/g, '').substring(0, 12); 
-        }
-
-        // --- INITIALIZATION ---
-        async function initApp() {
-            try {
-                // Fetch Settings
-                const { data: s, error } = await supabase.from('settings').select('*').single();
-                
-                if (error || !s) {
-                    console.log("Using default settings");
-                    appSettings = { 
-                        conversion_rate: 1, 
-                        min_withdraw_amount: 20, 
-                        min_referrals_req: 0,
-                        payment_methods: ["Bkash Personal"]
-                    };
-                } else {
-                    appSettings = s;
-                }
-
-                // Load Ads
-                if(appSettings.monetag_interstitial_id) loadAdScript(appSettings.monetag_interstitial_id, 'interstitial');
-                if(appSettings.monetag_rewarded_id) loadAdScript(appSettings.monetag_rewarded_id, 'rewarded');
-                if(appSettings.monetag_popup_id) loadAdScript(appSettings.monetag_popup_id, 'popup');
-
-                // Check Login
-                const uid = localStorage.getItem('user_id');
-                if (uid) await fetchUser(uid);
-                else showAuth();
-
-                // Check Referral Link
-                const params = new URLSearchParams(window.location.search);
-                if (params.get('ref')) { 
-                    toggleAuth('signup'); 
-                    document.getElementById('auth-ref').value = params.get('ref'); 
-                }
-
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('error-box').classList.remove('hidden');
-            }
-        }
-
-        // --- AUTH SYSTEM ---
-        function showAuth() {
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-        }
-
-        function toggleAuth(mode) {
-            authMode = mode;
-            const login = document.getElementById('tab-login');
-            const signup = document.getElementById('tab-signup');
-            const extra = document.getElementById('signup-fields');
-            const btn = document.getElementById('auth-btn');
-            
-            if(mode === 'login') {
-                login.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition";
-                signup.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition";
-                extra.classList.add('hidden');
-                btn.innerText = "LOGIN NOW";
-            } else {
-                signup.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#FFD700] text-black transition";
-                login.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 transition";
-                extra.classList.remove('hidden');
-                btn.innerText = "CREATE ACCOUNT";
-            }
-        }
-
-        async function submitAuth() {
-            const phoneVal = document.getElementById('auth-phone').value;
-            const pass = document.getElementById('auth-pass').value;
-            
-            if(!phoneVal || !pass) return Swal.fire('Error', 'Fill all fields', 'warning');
-            if(phoneVal.length !== 11) return Swal.fire('Error', 'Phone must be 11 digits', 'warning');
-
-            const phone = parseInt(phoneVal);
-            Swal.showLoading();
-
-            try {
-                if(authMode === 'login') {
-                    // LOGIN LOGIC
-                    const { data } = await supabase.from('users').select('*').eq('id', phone).eq('password', pass).single();
-                    Swal.close();
-                    if(data) {
-                        localStorage.setItem('user_id', data.id);
-                        location.reload();
-                    } else {
-                        Swal.fire('Error', 'Invalid Phone or Password', 'error');
-                    }
-                } else {
-                    // REGISTER LOGIC
-                    const name = document.getElementById('auth-name').value;
-                    const refVal = document.getElementById('auth-ref').value;
-                    if(!name) return Swal.fire('Error', 'Enter Name', 'warning');
-
-                    const { data: res, error } = await supabase.rpc('handle_new_user', {
-                        p_phone: phone,
-                        p_pass: pass,
-                        p_name: name,
-                        p_referrer: refVal ? parseInt(refVal) : null,
-                        p_device_id: getDeviceFingerprint()
-                    });
-                    Swal.close();
-
-                    if(res && res.success) {
-                        localStorage.setItem('user_id', phone);
-                        location.reload();
-                    } else {
-                        Swal.fire('Failed', res?.message || error?.message, 'error');
-                    }
-                }
-            } catch(e) {
-                Swal.close();
-                Swal.fire('Error', 'Network Error', 'error');
-            }
-        }
-
-        async function fetchUser(uid) {
-            const { data } = await supabase.from('users').select('*').eq('id', uid).single();
-            if(data) {
-                currentUser = data;
-                updateUI();
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('app-header').classList.remove('hidden');
-                document.getElementById('app-nav').classList.remove('hidden');
-                router('home');
-            } else {
-                localStorage.removeItem('user_id');
-                location.reload();
-            }
-        }
-
-        // --- TASK LOGIC (TIMER & REFERRAL LOCK) ---
-        document.addEventListener("visibilitychange", async () => {
-            if (document.visibilityState === "visible") {
-                const start = localStorage.getItem('t_start');
-                const tid = localStorage.getItem('t_id');
-                const rew = localStorage.getItem('t_rew');
-
-                if(start && tid) {
-                    const diff = Date.now() - parseInt(start);
-                    
-                    if(diff >= REQUIRED_TIME) {
-                        await addPoints(tid, rew);
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Task Failed',
-                            text: `You must stay for 15 seconds. You stayed only ${(diff/1000).toFixed(1)}s`,
-                            confirmButtonColor: '#FFD700'
-                        });
-                    }
-                    localStorage.removeItem('t_start'); localStorage.removeItem('t_id'); localStorage.removeItem('t_rew');
-                }
-            }
-        });
-
-        window.handleTask = (tid, rew, type, link) => {
-            // Check Referral Lock
-            const minRef = appSettings.min_referrals_req || 0;
-            const myRef = currentUser.referral_count || 0;
-            
-            if (myRef < minRef) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Locked!',
-                    text: `You need ${minRef} referrals to unlock tasks! You have ${myRef}.`,
-                    confirmButtonColor: '#FFD700'
-                });
-            }
-
-            // Task Execution
-            if(type === 'direct_ad' || type === 'offer_wheel') {
-                const url = (link && link !== 'null') ? link : appSettings.monetag_direct_link;
-                if(!url) return Swal.fire('Error', 'Link Empty', 'error');
-
-                localStorage.setItem('t_start', Date.now());
-                localStorage.setItem('t_id', tid);
-                localStorage.setItem('t_rew', rew);
-
-                window.open(url, '_blank');
-                Swal.fire({title: 'Wait 15s', text: 'Do not close tab', timer: 3000, showConfirmButton: false});
-            }
-            else if(type === 'video') {
-                if(adFuncs.rewarded) {
-                    Swal.fire({title: 'Loading Ad...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
-                    adFuncs.rewarded().then(() => { Swal.close(); addPoints(tid, rew); })
-                    .catch(() => { Swal.close(); Swal.fire('Failed', 'Watch full ad', 'error'); });
-                } else {
-                    Swal.fire('Loading', 'Ad not ready yet', 'warning');
-                }
-            }
-            else {
-                if(link) window.open(link, '_blank');
-                setTimeout(() => addPoints(tid, rew), 5000);
-            }
-        };
-
-        async function addPoints(tid, rew) {
-            Swal.fire({title: 'Adding...', didOpen: () => Swal.showLoading(), showConfirmButton: false});
-            const { data: res, error } = await supabase.rpc('claim_task', {
-                p_user_id: parseInt(currentUser.id), p_task_id: parseInt(tid),
-                p_reward: parseFloat(rew), p_limit: parseInt(appSettings.daily_task_limit)
-            });
-            Swal.close();
-
-            if(res && res.success) {
-                currentUser.balance += parseFloat(rew);
-                updateUI();
-                Swal.fire({icon: 'success', title: `+${rew} Points`, timer: 1500, showConfirmButton: false});
-                router('tasks');
-            } else {
-                Swal.fire('Notice', res?.message || 'Error', 'warning');
-            }
-        }
-
-        // --- WITHDRAW LOGIC ---
-        async function processWithdraw() {
-            const num = document.getElementById('w-num').value;
-            const amtVal = document.getElementById('w-amt').value;
-            const method = document.getElementById('w-method').value;
-
-            if(!num || !amtVal) return Swal.fire('Error', 'Empty fields', 'warning');
-
-            const amt = parseFloat(amtVal);
-            const pts = parseFloat((amt / appSettings.conversion_rate).toFixed(2));
-
-            if(amt < appSettings.min_withdraw_amount) return Swal.fire('Error', `Min ${appSettings.min_withdraw_amount} TK`, 'warning');
-            if(currentUser.balance < pts) return Swal.fire('Error', `Need ${pts} Points`, 'error');
-
-            document.getElementById('w-btn').innerText = "Processing...";
-            
-            const { data: res, error } = await supabase.rpc('process_withdrawal', {
-                p_user_id: parseInt(currentUser.id), p_method: method,
-                p_number: num, p_amount_bdt: amt, p_points_needed: pts
-            });
-
-            document.getElementById('w-btn').innerText = "WITHDRAW";
-
-            if(res && res.success) {
-                currentUser.balance -= pts;
-                updateUI();
-                Swal.fire('Success', 'Request Sent', 'success');
-                router('history');
-            } else {
-                Swal.fire('Error', res?.message || error?.message, 'error');
-            }
-        }
-
-        // --- UI HELPERS ---
-        function loadAdScript(zoneId, type) {
-            const s = document.createElement('script');
-            s.src = '//libtl.com/sdk.js'; s.dataset.zone = zoneId; s.dataset.sdk = 'show_' + zoneId;
-            s.onload = () => adFuncs[type] = window['show_' + zoneId];
-            document.head.appendChild(s);
-        }
-
-        function updateUI() {
-            if(!currentUser) return;
-            document.getElementById('user-name').innerText = currentUser.first_name;
-            document.getElementById('user-balance').innerText = Math.floor(currentUser.balance);
-            const photo = currentUser.photo_url || `https://ui-avatars.com/api/?name=${currentUser.first_name}&background=random`;
-            document.getElementById('user-photo').src = photo;
-        }
-
-        function router(page) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'text-[#FFD700]'));
-            const btn = document.getElementById('btn-'+page);
-            if(btn) btn.classList.add('active', 'text-[#FFD700]');
-            
-            const c = document.getElementById('main-app');
-            if(page === 'home') renderHome(c);
-            else if(page === 'tasks') renderTasks(c);
-            else if(page === 'wallet') renderWallet(c);
-            else if(page === 'history') renderHistory(c);
-            else if(page === 'refer') renderRefer(c);
-        }
-
-        // --- PAGE RENDERERS ---
-        function renderHome(c) {
-            c.innerHTML = `
-            <div class="glass-panel p-6 rounded-3xl text-center mt-4 border-t border-white/10 shadow-lg">
-                <h1 class="text-5xl font-bold text-white mb-2">${Math.floor(currentUser.balance)}</h1>
-                <p class="text-xs text-[#FFD700] tracking-widest uppercase">Available Points</p>
-                <button onclick="router('tasks')" class="mt-6 w-full py-4 rounded-2xl gold-gradient text-black font-bold uppercase shadow-lg active:scale-95 transition">START WORK</button>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center border border-white/5">
-                    <span class="text-2xl font-bold text-white">${currentUser.referral_count}</span>
-                    <span class="text-[10px] text-gray-400 uppercase mt-1">Refers</span>
-                </div>
-                <div class="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center border border-white/5">
-                    <span class="text-2xl font-bold text-green-400">Active</span>
-                    <span class="text-[10px] text-gray-400 uppercase mt-1">Status</span>
-                </div>
-            </div>
-            ${appSettings.home_banner_url ? `<img src="${appSettings.home_banner_url}" class="w-full h-36 object-cover rounded-xl mt-6 border border-white/10 shadow-lg">` : ''}`;
-        }
-
-        async function renderTasks(c) {
-            c.innerHTML = `<div class="flex justify-center mt-20"><div class="loader"></div></div>`;
-            const { data: tasks } = await supabase.from('tasks').select('*').eq('is_active', true).order('id');
-            const { data: logs } = await supabase.from('task_logs').select('task_id').eq('user_id', currentUser.id).eq('created_at', new Date().toISOString().split('T')[0]);
-            
-            const counts = {}; if(logs) logs.forEach(l => counts[l.task_id] = (counts[l.task_id] || 0) + 1);
-            const limit = appSettings.daily_task_limit;
-            
-            // Check Lock
-            const minRef = appSettings.min_referrals_req || 0;
-            const myRef = currentUser.referral_count || 0;
-            const isLocked = myRef < minRef;
-
-            let html = ``;
-            if(isLocked) {
-                html += `
-                <div class="glass-panel p-4 rounded-xl border border-red-500/30 bg-red-500/5 mb-4 text-center">
-                    <i class="fas fa-lock text-red-500 text-2xl mb-2"></i>
-                    <h3 class="text-red-400 font-bold">Tasks Locked!</h3>
-                    <p class="text-xs text-gray-300 mt-1">Need <span class="text-[#FFD700]">${minRef} referrals</span> to unlock.</p>
-                </div>`;
-            }
-
-            html += `<div class="space-y-4 pb-20">`;
-            tasks.forEach(t => {
-                const done = counts[t.id] || 0;
-                const disabled = done >= limit || isLocked;
-                let icon = (t.task_type === 'video' || t.task_type === 'rewarded_ads') ? 'play-circle' : 'globe';
-                
-                html += `
-                <div class="glass-panel p-4 rounded-2xl flex justify-between items-center ${disabled ? 'opacity-50 grayscale' : ''}">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#FFD700] text-xl border border-white/5"><i class="fas fa-${icon}"></i></div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">${t.title}</h4>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs text-[#FFD700] font-bold border border-[#FFD700]/30 px-2 py-0.5 rounded">+${t.reward}</span>
-                                <span class="text-[10px] text-gray-500">${done}/${limit}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="handleTask(${t.id}, ${t.reward}, '${t.task_type}', '${t.link}')" 
-                        ${disabled?'disabled':''} class="px-5 py-2.5 rounded-xl text-xs font-bold gold-gradient text-black shadow-lg active:scale-95 transition">
-                        ${isLocked ? '<i class="fas fa-lock"></i>' : (done >= limit ? 'Done' : 'Visit')}
-                    </button>
-                </div>`;
-            });
-            c.innerHTML = html + `</div>`;
-        }
-
-        function renderWallet(c) {
-            let opts = ''; 
-            if(appSettings.payment_methods) appSettings.payment_methods.forEach(m => opts += `<option value="${m}">${m}</option>`);
-            
-            c.innerHTML = `
-            <div class="glass-panel p-6 rounded-2xl text-center mt-4">
-                <h1 class="text-4xl font-bold text-white mb-1">\u09F3 ${(currentUser.balance * appSettings.conversion_rate).toFixed(2)}</h1>
-                <p class="text-xs text-gray-400">Min: ${appSettings.min_withdraw_amount} TK</p>
-            </div>
-            <div class="space-y-4 mt-6">
-                <select id="w-method" class="custom-input">${opts}</select>
-                <input type="number" id="w-num" placeholder="Number" class="custom-input">
-                <input type="number" id="w-amt" placeholder="Amount" class="custom-input">
-                <button id="w-btn" onclick="processWithdraw()" class="w-full py-3 rounded-xl gold-gradient text-black font-bold mt-4 shadow-lg active:scale-95 transition">WITHDRAW</button>
-            </div>`;
-        }
-
-        async function renderRefer(c) {
-            const link = `${location.origin}${location.pathname}?ref=${currentUser.id}`;
-            const { data: refers } = await supabase.from('users').select('first_name, created_at').eq('referred_by', currentUser.id);
-            
-            let hist = '';
-            if(refers && refers.length > 0) {
-                refers.forEach(u => {
-                    hist += `
-                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5 mb-2">
-                        <span class="text-sm font-bold text-white">${u.first_name}</span>
-                        <span class="text-[10px] text-gray-400">${new Date(u.created_at).toLocaleDateString()}</span>
-                    </div>`;
-                });
-            } else {
-                hist = `<div class="text-center text-gray-500 text-xs py-4">No referrals yet</div>`;
-            }
-
-            c.innerHTML = `
-            <div class="glass-panel p-6 rounded-2xl text-center mt-4 border border-[#FFD700]/30 shadow-lg">
-                <h2 class="text-2xl font-bold text-white">Refer & Earn</h2>
-                <p class="text-xs text-gray-400 mt-2">Bonus: ${appSettings.referral_bonus} Points</p>
-            </div>
-            <div class="glass-panel p-3 rounded-xl mt-6 flex items-center gap-3 bg-black/30 border border-white/10">
-                <input type="text" value="${link}" readonly class="bg-transparent text-xs w-full text-white outline-none" id="ref-link">
-                <button onclick="navigator.clipboard.writeText('${link}'); Swal.fire('Copied', '', 'success')" class="p-2.5 bg-[#FFD700] rounded-lg text-black"><i class="fas fa-copy"></i></button>
-            </div>
-            <div class="mt-6">
-                <h3 class="text-sm font-bold text-gray-400 mb-3 uppercase tracking-wider">Referral History (${refers ? refers.length : 0})</h3>
-                <div class="overflow-y-auto max-h-60 space-y-1 pr-1 custom-scroll">${hist}</div>
-            </div>`;
-        }
-
-        function renderHistory(c) {
-            c.innerHTML = `<div class="text-center mt-10"><div class="loader"></div></div>`;
-            supabase.from('withdrawals').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false})
-            .then(({data}) => {
-                let html = `<div class="space-y-3 mt-4">`;
-                if(!data || data.length === 0) html = `<div class="text-center text-gray-500 mt-20">Empty</div>`;
-                else data.forEach(i => {
-                    let col = i.status==='paid'?'text-green-400':(i.status==='rejected'?'text-red-400':'text-yellow-400');
-                    html += `
-                    <div class="glass-panel p-4 rounded-xl flex justify-between items-center border-l-4 ${i.status==='paid'?'border-green-500':'border-yellow-500'}">
-                        <div><h4 class="font-bold text-white">\u09F3 ${i.amount_bdt}</h4><p class="text-[10px] text-gray-400">${i.method}</p></div>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-white/10 uppercase ${col}">${i.status}</span>
-                    </div>`;
-                });
-                c.innerHTML = html + `</div>`;
-            });
-        }
-
-        // START APP
-        initApp();
-    </script>
+    <!-- JAVASCRIPT LINK -->
+    <script src="script.js"></script>
 </body>
 </html>
